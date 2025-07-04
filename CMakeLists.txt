@@ -5,23 +5,34 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include(FetchContent)
-FetchContent_declare(
+
+FetchContent_Declare(
   SFML
   GIT_REPOSITORY https://github.com/SFML/SFML.git
   GIT_TAG 3.0.1
 )
+
+FetchContent_Declare(
+  pugixml
+  GIT_REPOSITORY https://github.com/zeux/pugixml
+  GIT_TAG v1.14
+)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
-set(SFML_BUILD_DOC          OFF CACHE BOOL "" FORCE)   
-set(SFML_BUILD_TEST_SUITE   OFF CACHE BOOL "" FORCE)   
-set(SFML_BUILD_EXAMPLES     OFF CACHE BOOL "" FORCE)   
-FetchContent_MakeAvailable(SFML)
+
+set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_TEST_SUITE OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(SFML pugixml)
 
 file(GLOB SRC "src/*.cpp")
 add_executable(${PROJECT_NAME} ${SRC})
 
 target_link_libraries(${PROJECT_NAME}
-   PRIVATE
+  PRIVATE
+    pugixml
     SFML::Graphics
-    SFML::Audio   
-    SFML::Network 
+    SFML::Audio
+    SFML::Network
 )

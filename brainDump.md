@@ -25,19 +25,20 @@ BBBBBBBBBBBBBBBBB    rrrrrrr            aaaaaaaaaa  aaaaiiiiiiii nnnnnn    nnnnn
                                                                                                                                                     ppppppppp                                                                                                                                                          
                                                                                                                                                                                                                                                                                                                        
 </pre>
-> huuuh this is the place where i am going to outline all of my stuff — to-do, ideas, notes, and all the other dumb things I forget. If you're reading this for some reason... don't. There are typos and weird rambles and you will lose braincells.
+> huuuh this is the place where i am going to outline all of my stuff — to-do, ideas, notes, and all the other dumb things I forget.  
+> If you're reading this for some reason... don't.  
+> There are typos and weird rambles and you will lose braincells.
 
 ---
 
 ## 🎯 The Plan
 
 The theme is **"Every Action Has a Cost."**  
-I asked ChatGPT for name ideas and I **really liked** the name: `Oopsie Economy`. So I’ll make something around city-building or resource-spending, where you do stuff and it *costs* you something.
+I asked ChatGPT for name ideas and I **really liked** the name: `Oopsie Economy`.  
+So I’ll make something around city-building or resource-spending, where you do stuff and it *costs* you something.
 
-**I don't want to use basic stuff like health or generic player stats.**  
+I don't wanna use basic stuff like health or generic player stats.  
 I want it to be *dumb* and *unique* (spelling errors are free flavor — don’t file an issue on it 💀).
-
-I had no idea what to make but now…
 
 ---
 
@@ -46,28 +47,33 @@ I had no idea what to make but now…
 Since I’m a dumb guy, I’ll make the player also make **dumb decisions** with money (or some cursed in-game currency) in order to progress.
 
 You are a **wizard**.  
-A lonely, kinda pathetic wizard. And like me, you want a girlfriend 😔.  
-So the wizard’s goal is to make **a love potion**.
+A lonely, kinda pathetic wizard.  
+And like me, you want a girlfriend 😔.
+
+So the wizard’s goal is to make a **love potion**.
 
 But what kind of potions? Hmm...
 
 💡 Got it — ***Love potions.***  
-Why? Because the wizard is down bad and wants to fall in love. How wholesome. (and a lil desperate)
+Why?  
+Because the wizard is down bad and wants to fall in love. How wholesome. (and a lil desperate)
 
-But here's the twist: **you need money/items/resources to do anything**, and the economy is totally janked.
+But here's the twist:  
+You need **money/items/resources to do ANYTHING**, and the economy is totally janked.
 
-So even though you're trying to collect ingredients, you're constantly getting scammed, or your actions backfire.
+Even though you're trying to collect ingredients, you're constantly getting scammed, or your actions backfire.
 
 ---
 
 ## 🐸 Setup
 
-You play as a **delusional wizard** trying to win the love of his crush — maybe another wizard, a frog, or a tax collector. (Frog crush is fire ngl.)
+You play as a **delusional wizard** trying to win the love of his crush — maybe another wizard, a frog, or a tax collector.  
+(Frog crush is fire ngl.)
 
 But: **the economy is cursed AF**.  
 Every time you try to do something (gather, buy, steal, etc.), you get scammed, overcharged, or cause chaos.
 
-> You must collect all ingredients before the economy collapses, you go broke, or worse… fall in love with your own potion. 🏳️‍🌈
+> You must collect all ingredients before the economy collapses, you go broke, or worse… fall in love with your own potion 🏳️‍🌈
 
 ---
 
@@ -91,7 +97,6 @@ The more you mess around, the more the world starts to fall apart. That's the po
 ## 🧠 Summary
 
 The main thing is:
-The main thing is:
 - [x] The world economy is kinda **fucked**
 - [x] You are **dumb**
 - [x] Your goal is to **make a love potion**
@@ -102,20 +107,96 @@ The main thing is:
 
 ## ⏱️ Scope & Time
 
-Now i have to make all this in just **3 days** using **no game engine** and the god language: `C++`.
-Why no engine?
-> because -> **fuck me I hate myself.**
+I have to make all this in just **3 days**, using **no game engine** and the god language: `C++`.
 
-# To-do
+Why no engine?  
+> because → **fuck me I hate myself.**
+
+---
+
+# ✅ To-do
 
 But first — I tried making it modular…  
-Then I was like *“nahhh”*, it’ll slow me down, and I don’t have too much time to make something perfect right now.  
-So yeah, this is in a single file **for now**. I’ll refactor after the jam ends — that’s Future Me’s problem.  
+Then I was like *“nahhh”*, it’ll slow me down, and I don’t have time to make something perfect rn.  
+So yeah, this is in a single file **for now**.  
+I’ll refactor after the jam ends — that’s Future Me’s problem.
+
 Back to basics for now.
 
 ### Things that I know how to do but I’m procrastinating because I’m a sloth and a professional procrastinator:
-
 - [ ] Load the tilemap (hmm i can't think of smt else rn yeah wish me luck chat!!!)
 
-maybe i will make the tilemap in a diff file maybe 
-> new hatsune miku albums are so fire omg 
+> also new hatsune miku albums are so fire omg
+
+---
+
+## 💬 Small Talk
+
+**18:32 → 3 days left + 2 smt hrs**
+
+Ok I feel the pressure now  
+And it's ONLY the tilemap 😭  
+I haven't decided anything on how the game will progress or how the story will go, but maybe I got smt — writing it here ↓↓↓
+
+---
+
+## 📜 Game Flow (??)
+
+The game will start with the **indoor stuff**, explaining the story and what you need to do.
+
+Then there's maybe an **open field**??
+
+Actually nah — I don’t even have NPCs or a tilemap yet lmao
+
+---
+
+### ❗REALITY CHECK
+
+I’m probs over-scoping it
+
+Need to go SIMPLE
+Very very simple
+Like babygame simple
+
+I got no idea what I’m doing suddenly  
+Send help pls
+
+---
+
+## ✨ OKAY SAVING IDEA INCOMING ✨
+
+I’m gonna **limit the player’s movement**  
+This entire game is gonna be INDOORS  
+That means:
+
+- 🚫 No quests
+- 🚫 No NPCs
+- 🚫 No outside world
+- ✅ Just potion brewing chaos
+
+---
+
+### Sooo How Do I Interpolate the Theme?
+
+**BINGO — here's the core loop:**
+
+You're stuck inside trying to make the perfect love potion.
+
+But!  
+Every time you add something to the potion, **it costs you something**.
+
+Like:
+- Add too much mushroom? → Potion is stronger, but you age 5x faster  
+- Add ghost hair? → +Charm, but your memory gets wiped  
+- Add glitter? → Looks fab, but you attract cursed tax spirits
+
+So the goal is to **make the perfect potion and get the best huzz**  
+(aka the best possible ending)
+
+---
+
+If I somehow finish early maybe I’ll throw in some weak-ass enemies or frogs or cursed taxes or whatever.
+
+Let’s get this thing going.  
+Hell yeah.  
+I’m feeling **so creatively horny rn** LET’S GO.

@@ -4,13 +4,12 @@
 #include <iostream>
 #include <optional>
 
-// #include "tilemap.hpp"
 
 #define TILESIZE 16
 
 struct window {
   unsigned int width = 960;
-  unsigned int height = 540;
+  unsigned int height = 528;
   const char *title = "lmao";
 };
 
@@ -83,7 +82,6 @@ private:
 int main() {
   window win;
   Entity entity;
-  // Tilemap tilemap;
 
   sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
   sf::RenderWindow window(sf::VideoMode({win.width, win.height}), win.title,
