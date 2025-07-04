@@ -1,3 +1,6 @@
+#include "SFML/System/Clock.hpp"
+#include "SFML/System/Vector2.hpp"
+#include "SFML/Window/Keyboard.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <iostream>
@@ -12,48 +15,75 @@ struct window {
 };
 
 struct EntityStuff {
-  int spriteSize = 16;
+  sf::Vector2f velocity;
+  sf::Vector2f positions;
+  int speed = 200;
   int XIndex = 0;
   int YIndex = 0;
+  int spriteSize = 16;
 };
 
 class Entity : public sf::Drawable, public sf::Transformable {
 public:
-  Entity() : Entitysprite(Entitytexture) { initEntity(); };
+  Entity() : Entitysprite(Entitytexture) { initEntity(); }
 
   void initEntity() {
     sf::IntRect rect({entityStuff.XIndex * entityStuff.spriteSize,
                       entityStuff.YIndex * entityStuff.spriteSize},
                      {entityStuff.spriteSize, entityStuff.spriteSize});
-    if (!Entitytexture.loadFromFile("../assets/Sprite-0001.png", false,
-                                    rect)) {
-      std::cout << "Fuck";
+
+    if (!Entitytexture.loadFromFile("../assets/Sprite-0001.png", false, rect)) {
+      std::cout << "Failed to load texture\n";
     } else {
       Entitysprite.setTexture(Entitytexture);
       Entitysprite.setTextureRect(rect);
       Entitysprite.setPosition({100, 100});
+      entityStuff.positions = {100, 100}; 
     }
-    if(entityStuff.XIndex+16 > Entitytexture.getSize().x){
-      std::cout << "fuck";
-    }
-  };
 
-  void updateEntity();
+    int x = entityStuff.XIndex * entityStuff.spriteSize;
+    if (x + entityStuff.spriteSize > static_cast<int>(Entitytexture.getSize().x)) {
+      std::cout << "Sub-rect out of bounds now suck tits\n";
+    }
+  }
+
+  void updateEntity(float dt) {
+    move(dt);
+    entityStuff.positions += entityStuff.velocity * dt;
+    Entitysprite.setPosition(entityStuff.positions); 
+  }
 
 private:
+  void move(float dt) {
+    entityStuff.velocity = {0, 0};
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+      entityStuff.velocity.x += 1;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+      entityStuff.velocity.x -= 1;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+      entityStuff.velocity.y -= 1;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+      entityStuff.velocity.y += 1;
+
+    if (entityStuff.velocity.length() > 0.f) {
+      entityStuff.velocity = entityStuff.velocity.normalized() * static_cast<float>(entityStuff.speed);
+    }
+  }
+
   EntityStuff entityStuff;
   sf::Sprite Entitysprite;
   sf::Texture Entitytexture;
 
-private:
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const {
-    target.draw(Entitysprite);
+  void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
+    target.draw(Entitysprite, states);
   }
 };
 
 int main() {
   window win;
   Entity entity;
+
   sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
   sf::RenderWindow window(sf::VideoMode({win.width, win.height}), win.title,
                           sf::Style::Titlebar | sf::Style::Close);
@@ -63,7 +93,10 @@ int main() {
   window.setPosition(centeredPosition);
   window.setVerticalSyncEnabled(true);
 
+  sf::Clock clock;
   while (window.isOpen()) {
+    float dt = clock.restart().asSeconds();
+    entity.updateEntity(dt);
     while (const std::optional<sf::Event> event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>()) {
         window.close();
