@@ -1,6 +1,3 @@
-#include "SFML/System/Clock.hpp"
-#include "SFML/System/Vector2.hpp"
-#include "SFML/Window/Keyboard.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <iostream>
@@ -56,15 +53,19 @@ public:
 private:
   void move(float dt) {
     entityStuff.velocity = {0, 0};
-
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-      entityStuff.velocity.x += entityStuff.speed;
+      entityStuff.velocity.x += 1;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-      entityStuff.velocity.x -= entityStuff.speed;
+      entityStuff.velocity.x -= 1;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-      entityStuff.velocity.y -= entityStuff.speed;
+      entityStuff.velocity.y -= 1;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-      entityStuff.velocity.y += entityStuff.speed;
+      entityStuff.velocity.y += 1;
+
+    if(entityStuff.velocity.length() > 0){
+      entityStuff.velocity = entityStuff.velocity.normalized();
+    }
+    entityStuff.velocity *= static_cast<float>(entityStuff.speed);
   }
 
   EntityStuff entityStuff;

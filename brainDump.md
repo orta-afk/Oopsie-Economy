@@ -91,11 +91,12 @@ The more you mess around, the more the world starts to fall apart. That's the po
 ## 🧠 Summary
 
 The main thing is:
-- [] The world economy is kinda **fucked**
-- [] You are **dumb**
-- [] Your goal is to **make a love potion**
-- [] You take actions to fulfill that goal
-- [] And you pay the cost. Every. Single. Time.
+The main thing is:
+- [x] The world economy is kinda **fucked**
+- [x] You are **dumb**
+- [x] Your goal is to **make a love potion**
+- [x] You take actions to fulfill that goal
+- [x] And you pay the cost. Every. Single. Time.
 
 ---
 
@@ -105,4 +106,16 @@ Now i have to make all this in just **3 days** using **no game engine** and the 
 Why no engine?
 > because -> **fuck me I hate myself.**
 
+# To-do
 
+But first — I tried making it modular…  
+Then I was like *“nahhh”*, it’ll slow me down, and I don’t have too much time to make something perfect right now.  
+So yeah, this is in a single file **for now**. I’ll refactor after the jam ends — that’s Future Me’s problem.  
+Back to basics for now.
+
+### Things that I know how to do but I’m procrastinating because I’m a sloth and a professional procrastinator:
+
+- [ ] Load the tilemap (hmm i can't think of smt else rn yeah wish me luck chat!!!)
+
+maybe i will make the tilemap in a diff file maybe 
+> new hatsune miku albums are so fire omg 
