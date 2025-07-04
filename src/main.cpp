@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <optional>
-
+#include <unordered_map>
 
 #define TILESIZE 16
 
@@ -22,6 +22,25 @@ struct EntityStuff {
   int spriteSize = 16;
 };
 
+// 18
+
+enum class tiles : int {
+  background = 0,
+  topLeftCorner,
+  topMiddleTile,
+  topRightCorner,
+  middleLeft,
+  middleRight,
+  bottomLeftCorner,
+  bottomMiddleTile,
+  bottomRightCorner,
+};
+
+struct indexs {
+  int x;
+  int y;
+};
+
 class Entity : public sf::Drawable, public sf::Transformable {
 public:
   Entity() : Entitysprite(Entitytexture) { initEntity(); }
@@ -31,17 +50,19 @@ public:
                       entityStuff.YIndex * entityStuff.spriteSize},
                      {entityStuff.spriteSize, entityStuff.spriteSize});
 
-    if (!Entitytexture.loadFromFile("../assets/colored-transparent_packed.png")) {
+    if (!Entitytexture.loadFromFile(
+            "../assets/colored-transparent_packed.png")) {
       std::cout << "Failed to load texture\n";
     } else {
       Entitysprite.setTexture(Entitytexture);
       Entitysprite.setTextureRect(rect);
       Entitysprite.setPosition({100, 100});
-      entityStuff.positions = {100, 100}; 
+      entityStuff.positions = {100, 100};
     }
 
     int x = entityStuff.XIndex * entityStuff.spriteSize;
-    if (x + entityStuff.spriteSize > static_cast<int>(Entitytexture.getSize().x)) {
+    if (x + entityStuff.spriteSize >
+        static_cast<int>(Entitytexture.getSize().x)) {
       std::cout << "Sub-rect out of bounds now suck tits\n";
     }
   }
@@ -49,7 +70,7 @@ public:
   void updateEntity(float dt) {
     move(dt);
     entityStuff.positions += entityStuff.velocity * dt;
-    Entitysprite.setPosition(entityStuff.positions); 
+    Entitysprite.setPosition(entityStuff.positions);
   }
 
 private:
@@ -64,7 +85,7 @@ private:
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
       entityStuff.velocity.y += 1;
 
-    if(entityStuff.velocity.length() > 0){
+    if (entityStuff.velocity.length() > 0) {
       entityStuff.velocity = entityStuff.velocity.normalized();
     }
     entityStuff.velocity *= static_cast<float>(entityStuff.speed);
@@ -79,9 +100,98 @@ private:
   }
 };
 
+class Tilemap : public sf::Drawable, public sf::Transformable {
+public:
+  Tilemap() : vert(sf::PrimitiveType::Triangles, 3) { initTilemap(); }
+  void initTilemap(){
+    if(!texture.loadFromFile("../assets/colored-transparent_packed.png")){
+      std::cout << "FUUCKKKKKKK!!!!!! \n";
+    }
+    for(int j = 0; j < mapHeight; j++){
+      for(int i = 0; i < mapWidth; i++){
+        int tilePerRow = texture.getSize().x / TILESIZE;
+        if(j == 7){
+          if(i == 5){
+            map[j][i] = getTileIndex(tiles::topLeftCorner, tilePerRow);
+          } else if(i == mapWidth - 6){
+            map[j][i] = getTileIndex(tiles::topRightCorner, tilePerRow);
+          }else{
+            map[j][i] = getTileIndex(tiles::topMiddleTile, tilePerRow);
+          }
+        }else{
+          map[j][i] = static_cast<int>(tiles::background);
+        }   
+      }
+    }
+  }
+  void updateTilemap() {
+    vert.clear();
+    vert.setPrimitiveType(sf::PrimitiveType::Triangles);
+    vert.resize(mapWidth * mapHeight * 6);
+    for (int j = 0; j < mapHeight; j++) {
+      for (int i = 0; i < mapWidth; i++) {
+        const int index = map[j][i]; 
+        const int tu = index % (texture.getSize().x / 16);
+        const int tv = index / (texture.getSize().x / 16);
+        sf::Vertex *triangles = &vert[(i + j * mapWidth) * 6];
+
+        triangles[0].position = sf::Vector2f(i * TILESIZE, j * TILESIZE);
+        triangles[1].position = sf::Vector2f((i + 1) * TILESIZE, j * TILESIZE);
+        triangles[2].position = sf::Vector2f(i * TILESIZE, (j + 1) * TILESIZE);
+        triangles[3].position = sf::Vector2f(i * TILESIZE, (j + 1) * TILESIZE);
+        triangles[4].position = sf::Vector2f((i + 1) * TILESIZE, j * TILESIZE);
+        triangles[5].position =
+            sf::Vector2f((i + 1) * TILESIZE, (j + 1) * TILESIZE);
+
+        triangles[0].texCoords = sf::Vector2f(tu * TILESIZE, tv * TILESIZE);
+        triangles[1].texCoords =
+            sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
+        triangles[2].texCoords =
+            sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[3].texCoords =
+            sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[4].texCoords =
+            sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
+        triangles[5].texCoords =
+            sf::Vector2f((tu + 1) * TILESIZE, (tv + 1) * TILESIZE);
+      }
+    }
+  }
+
+private:
+  int getTileIndex(tiles t, int tilesPerRow) {
+    indexs coords = mapIndex.at(t);
+    return coords.x + coords.y * tilesPerRow;
+  }
+  
+private:
+  const static int mapWidth = 60;
+  const static int mapHeight = 33;
+  sf::Texture texture;
+  sf::VertexArray vert;
+  std::array<std::array<int, mapWidth>, mapHeight> map;
+  void draw(sf::RenderTarget &target, sf::RenderStates states) const {
+    states.transform *= getTransform();
+    states.texture = &texture;
+    target.draw(vert, states);
+  };
+  std::unordered_map<tiles, indexs> mapIndex = {
+    {tiles::background, {0, 0}},
+    {tiles::topLeftCorner, {18, 0}},
+    {tiles::topMiddleTile, {19, 0}},
+    {tiles::topRightCorner, {20, 0}}, // 🔥 was missing before!
+    {tiles::middleLeft, {18, 1}},
+    {tiles::middleRight, {19, 1}},
+    {tiles::bottomLeftCorner, {18, 2}},
+    {tiles::bottomMiddleTile, {19, 2}},
+    {tiles::bottomRightCorner, {20, 2}},
+  };
+};
+
 int main() {
   window win;
   Entity entity;
+  Tilemap tilemap;
 
   sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
   sf::RenderWindow window(sf::VideoMode({win.width, win.height}), win.title,
@@ -92,6 +202,8 @@ int main() {
   window.setPosition(centeredPosition);
   window.setVerticalSyncEnabled(true);
 
+  tilemap.initTilemap();
+  tilemap.updateTilemap();
   sf::Clock clock;
   while (window.isOpen()) {
     float dt = clock.restart().asSeconds();
@@ -103,6 +215,7 @@ int main() {
     }
     window.clear();
     window.draw(entity);
+    window.draw(tilemap);
     window.display();
   }
 }
