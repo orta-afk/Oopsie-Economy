@@ -58,17 +58,13 @@ private:
     entityStuff.velocity = {0, 0};
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-      entityStuff.velocity.x += 1;
+      entityStuff.velocity.x += entityStuff.speed;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-      entityStuff.velocity.x -= 1;
+      entityStuff.velocity.x -= entityStuff.speed;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-      entityStuff.velocity.y -= 1;
+      entityStuff.velocity.y -= entityStuff.speed;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-      entityStuff.velocity.y += 1;
-
-    if (entityStuff.velocity.length() > 0.f) {
-      entityStuff.velocity = entityStuff.velocity.normalized() * static_cast<float>(entityStuff.speed);
-    }
+      entityStuff.velocity.y += entityStuff.speed;
   }
 
   EntityStuff entityStuff;
