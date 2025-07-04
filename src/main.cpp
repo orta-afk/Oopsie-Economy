@@ -1,7 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+
 #include <iostream>
 #include <optional>
+
+// #include "tilemap.hpp"
 
 #define TILESIZE 16
 
@@ -15,7 +18,7 @@ struct EntityStuff {
   sf::Vector2f velocity;
   sf::Vector2f positions;
   int speed = 200;
-  int XIndex = 0;
+  int XIndex = 24;
   int YIndex = 0;
   int spriteSize = 16;
 };
@@ -29,7 +32,7 @@ public:
                       entityStuff.YIndex * entityStuff.spriteSize},
                      {entityStuff.spriteSize, entityStuff.spriteSize});
 
-    if (!Entitytexture.loadFromFile("../assets/Sprite-0001.png", false, rect)) {
+    if (!Entitytexture.loadFromFile("../assets/colored-transparent_packed.png")) {
       std::cout << "Failed to load texture\n";
     } else {
       Entitysprite.setTexture(Entitytexture);
@@ -80,6 +83,7 @@ private:
 int main() {
   window win;
   Entity entity;
+  // Tilemap tilemap;
 
   sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
   sf::RenderWindow window(sf::VideoMode({win.width, win.height}), win.title,
