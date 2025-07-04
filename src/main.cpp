@@ -107,20 +107,33 @@ public:
     if(!texture.loadFromFile("../assets/colored-transparent_packed.png")){
       std::cout << "FUUCKKKKKKK!!!!!! \n";
     }
-    for(int j = 0; j < mapHeight; j++){
-      for(int i = 0; i < mapWidth; i++){
-        int tilePerRow = texture.getSize().x / TILESIZE;
-        if(j == 7){
-          if(i == 5){
-            map[j][i] = getTileIndex(tiles::topLeftCorner, tilePerRow);
-          } else if(i == mapWidth - 6){
-            map[j][i] = getTileIndex(tiles::topRightCorner, tilePerRow);
-          }else{
-            map[j][i] = getTileIndex(tiles::topMiddleTile, tilePerRow);
-          }
-        }else{
-          map[j][i] = static_cast<int>(tiles::background);
-        }   
+    int tilePerRow = texture.getSize().x / TILESIZE;
+
+    for (int j = 0; j < mapHeight; ++j) {
+      for (int i = 0; i < mapWidth; ++i) {
+        int tile = getTileIndex(tiles::background, tilePerRow);
+
+        if (j == 28) {
+          if (i == 5)
+            tile = getTileIndex(tiles::topLeftCorner, tilePerRow);
+          else if (i == mapWidth - 6)
+            tile = getTileIndex(tiles::topRightCorner, tilePerRow);
+          else if (i > 5 && i < mapWidth - 6)
+            tile = getTileIndex(tiles::topMiddleTile, tilePerRow);
+        } else if (j > 28 && j < mapHeight - 1) {
+          if (i == 5)
+            tile = getTileIndex(tiles::middleLeft, tilePerRow);
+          else if (i == mapWidth - 6)
+            tile = getTileIndex(tiles::middleRight, tilePerRow);
+        } else if (j == mapHeight - 1) {
+          if (i == 5)
+            tile = getTileIndex(tiles::bottomLeftCorner, tilePerRow);
+          else if (i == mapWidth - 6)
+            tile = getTileIndex(tiles::bottomRightCorner, tilePerRow);
+          else if (i > 5 && i < mapWidth - 6)
+            tile = getTileIndex(tiles::bottomMiddleTile, tilePerRow);
+        }
+        map[j][i] = tile;
       }
     }
   }
@@ -140,20 +153,14 @@ public:
         triangles[2].position = sf::Vector2f(i * TILESIZE, (j + 1) * TILESIZE);
         triangles[3].position = sf::Vector2f(i * TILESIZE, (j + 1) * TILESIZE);
         triangles[4].position = sf::Vector2f((i + 1) * TILESIZE, j * TILESIZE);
-        triangles[5].position =
-            sf::Vector2f((i + 1) * TILESIZE, (j + 1) * TILESIZE);
+        triangles[5].position = sf::Vector2f((i + 1) * TILESIZE, (j + 1) * TILESIZE);
 
         triangles[0].texCoords = sf::Vector2f(tu * TILESIZE, tv * TILESIZE);
-        triangles[1].texCoords =
-            sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
-        triangles[2].texCoords =
-            sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
-        triangles[3].texCoords =
-            sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
-        triangles[4].texCoords =
-            sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
-        triangles[5].texCoords =
-            sf::Vector2f((tu + 1) * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[1].texCoords = sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
+        triangles[2].texCoords = sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[3].texCoords = sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[4].texCoords = sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
+        triangles[5].texCoords = sf::Vector2f((tu + 1) * TILESIZE, (tv + 1) * TILESIZE);
       }
     }
   }
@@ -179,9 +186,9 @@ private:
     {tiles::background, {0, 0}},
     {tiles::topLeftCorner, {18, 0}},
     {tiles::topMiddleTile, {19, 0}},
-    {tiles::topRightCorner, {20, 0}}, // 🔥 was missing before!
+    {tiles::topRightCorner, {20, 0}}, 
     {tiles::middleLeft, {18, 1}},
-    {tiles::middleRight, {19, 1}},
+    {tiles::middleRight, {20, 1}},
     {tiles::bottomLeftCorner, {18, 2}},
     {tiles::bottomMiddleTile, {19, 2}},
     {tiles::bottomRightCorner, {20, 2}},
