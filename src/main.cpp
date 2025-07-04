@@ -1,6 +1,10 @@
-#include <iostream>
+#include "game.hpp"
 
 int main(){
-  std::cout << "let's goo \n";
+  Game game;
+  while(game.isRunning()){
+    game.updateGame();
+    game.renderGame();
+  }
   return 0;
 }

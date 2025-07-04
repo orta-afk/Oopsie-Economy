@@ -101,6 +101,8 @@ The main thing is:
 
 ## ⏱️ Scope & Time
 
-Now i have to make this in **3 days** using **no game engine** and the god language: `C++`.
+Now i have to make all this in just **3 days** using **no game engine** and the god language: `C++`.
 Why no engine?
 > because -> **fuck me I hate myself.**
+
+
