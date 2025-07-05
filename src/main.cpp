@@ -7,22 +7,28 @@
 
 #define TILESIZE 16
 
+bool isblah;
+
 struct window {
   unsigned int width = 960;
   unsigned int height = 528;
-  const char *title = "lmao";
+  const char *title = "Oopsie Economy";
 };
 
 struct EntityStuff {
-  sf::Vector2f velocity;
-  sf::Vector2f positions;
-  int g = 400;
-  int max_g = 600;
-  int speed = 200;
-  int XIndex = 24;
-  int YIndex = 0;
-  int spriteSize = 16;
+  sf::Vector2f velocity = {0.f, 0.f};
+  sf::Vector2f positions = {100.f, 100.f};
+  float g = 800.f;          
+  float jumpVelocity = 400.f;
+  float max_g = 1200.f; 
+  float speed = 200.f;
+  float friction = 0.3f;
+  int XIndex = 26;
+  int YIndex = 0; 
+  int spriteSize = 16; 
+  bool canJump;
 };
+
 
 // 18
 
@@ -69,11 +75,11 @@ public:
     }
   }
 
-  void updateEntity(float dt) {
+  void updateEntity(float dt, bool isCollided) {
     move(dt);
-    gravity(dt);
-    entityStuff.positions += entityStuff.velocity * dt;
+    gravity(dt, isCollided);
     entityBounds();
+    entityStuff.positions += entityStuff.velocity * dt;
     Entitysprite.setPosition(entityStuff.positions);
   }
 
@@ -83,29 +89,32 @@ public:
   }
 
 private:
-  void gravity(float dt){
-    entityStuff.velocity.y += entityStuff.g * dt;
-    if(entityStuff.velocity.y > entityStuff.max_g){
-      entityStuff.velocity.y = entityStuff.max_g;
+  void gravity(float dt, bool collided){
+    if(!collided){
+      entityStuff.velocity.y += entityStuff.g * dt;
+      if(entityStuff.velocity.y > entityStuff.max_g){
+        entityStuff.velocity.y = entityStuff.max_g;
+        entityStuff.canJump = false;
+      }
+    }else{
+      entityStuff.canJump = true;
+      entityStuff.velocity.y = 0.f;
     }
   }
   
   void move(float dt) {
-    entityStuff.velocity = {0, 0};
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-      entityStuff.velocity.x += 1;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-      entityStuff.velocity.x -= 1;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-      entityStuff.velocity.y -= 1;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-      entityStuff.velocity.y += 1;
+      entityStuff.velocity.x += entityStuff.speed * dt;
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+      entityStuff.velocity.x -= entityStuff.speed * dt;
+    else
+      entityStuff.velocity.x = 0;
 
-    if (entityStuff.velocity.length() > 0) {
-      entityStuff.velocity = entityStuff.velocity.normalized();
+    if (entityStuff.canJump && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
+      entityStuff.velocity.y = -entityStuff.jumpVelocity; 
+      entityStuff.canJump = false; 
     }
-    entityStuff.velocity *= static_cast<float>(entityStuff.speed);
-  }
+ }
 
   EntityStuff entityStuff;
   sf::Sprite Entitysprite;
@@ -153,6 +162,7 @@ public:
       }
     }
   }
+  
   void updateTilemap() {
     vert.clear();
     vert.setPrimitiveType(sf::PrimitiveType::Triangles);
@@ -186,12 +196,28 @@ public:
     return vert.getBounds();
   }
   
-private:
+public:
   int getTileIndex(tiles t, int tilesPerRow) {
     indexs coords = mapIndex.at(t);
     return coords.x + coords.y * tilesPerRow;
   }
-  
+
+  int getTileperRow(){
+    return texture.getSize().x/TILESIZE;
+  }
+
+  int getTileAt(int x, int y){
+    return map[y][x];
+  }
+
+  int getMapWidth(){
+    return mapWidth;
+  }
+
+  int getMapHeight(){
+  return mapHeight;
+}  
+
 private:
   const static int mapWidth = 60;
   const static int mapHeight = 33;
@@ -217,10 +243,21 @@ private:
 };
 
 bool collided(Entity& e, Tilemap& t){
-  if(e.entityBounds().findIntersection(t.getTileBounds())){
-    std::cout << "HOLY FUCK";
+  for(int j = 0; j < t.getMapHeight(); j++){
+    for(int i = 0; i < t.getMapWidth(); i++){
+      int TileIndex = t.getTileAt(i, j);
+      int tileperRow = t.getTileperRow();
+      sf::FloatRect tilemapBounds({static_cast<float>(i)*TILESIZE, static_cast<float>(j)*TILESIZE},{TILESIZE,TILESIZE});
+      if (e.entityBounds().findIntersection(tilemapBounds)) {
+        if (TileIndex == t.getTileIndex(tiles::background, tileperRow)) {
+          isblah = false;
+        } else {
+          isblah = true;
+        }
+      }
+    }
   }
-  return true;
+  return isblah;
 }
 
 int main() {
@@ -243,7 +280,7 @@ int main() {
   sf::Clock clock;
   while (window.isOpen()) {
     float dt = clock.restart().asSeconds();
-    entity.updateEntity(dt);
+    entity.updateEntity(dt, isCollided);
     isCollided = collided(entity, tilemap);
     while (const std::optional<sf::Event> event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>()) {
