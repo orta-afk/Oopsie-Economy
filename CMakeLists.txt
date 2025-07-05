@@ -12,26 +12,19 @@ FetchContent_Declare(
   GIT_TAG 3.0.1
 )
 
-FetchContent_Declare(
-  pugixml
-  GIT_REPOSITORY https://github.com/zeux/pugixml
-  GIT_TAG v1.14
-)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
 set(SFML_BUILD_TEST_SUITE OFF CACHE BOOL "" FORCE)
 set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(SFML pugixml)
+FetchContent_MakeAvailable(SFML)
 
 file(GLOB SRC "src/*.cpp")
 add_executable(${PROJECT_NAME} ${SRC})
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
-    pugixml
     SFML::Graphics
     SFML::Audio
     SFML::Network

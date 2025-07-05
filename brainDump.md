@@ -212,3 +212,4 @@ the tilemap is loading now it's time to get the collision down and some game pla
 
 ### 🧠 the plan that i have in my mind
   first i will get the collision down then i will just make bunch of variable which will edit player's states and yeah ig it's easy after this hope so the game looks ass rn frfr the player looks very small and the movement is ass as well and the code ughhh sucks!!!! truly spaghetti codde
+

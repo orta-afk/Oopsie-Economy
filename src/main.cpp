@@ -16,6 +16,8 @@ struct window {
 struct EntityStuff {
   sf::Vector2f velocity;
   sf::Vector2f positions;
+  int g = 400;
+  int max_g = 600;
   int speed = 200;
   int XIndex = 24;
   int YIndex = 0;
@@ -69,11 +71,25 @@ public:
 
   void updateEntity(float dt) {
     move(dt);
+    gravity(dt);
     entityStuff.positions += entityStuff.velocity * dt;
+    entityBounds();
     Entitysprite.setPosition(entityStuff.positions);
   }
 
+public:
+  sf::FloatRect entityBounds(){
+    return Entitysprite.getGlobalBounds();
+  }
+
 private:
+  void gravity(float dt){
+    entityStuff.velocity.y += entityStuff.g * dt;
+    if(entityStuff.velocity.y > entityStuff.max_g){
+      entityStuff.velocity.y = entityStuff.max_g;
+    }
+  }
+  
   void move(float dt) {
     entityStuff.velocity = {0, 0};
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
@@ -165,6 +181,11 @@ public:
     }
   }
 
+public:
+  sf::FloatRect getTileBounds(){
+    return vert.getBounds();
+  }
+  
 private:
   int getTileIndex(tiles t, int tilesPerRow) {
     indexs coords = mapIndex.at(t);
@@ -195,10 +216,18 @@ private:
   };
 };
 
+bool collided(Entity& e, Tilemap& t){
+  if(e.entityBounds().findIntersection(t.getTileBounds())){
+    std::cout << "HOLY FUCK";
+  }
+  return true;
+}
+
 int main() {
   window win;
   Entity entity;
   Tilemap tilemap;
+  bool isCollided = false;
 
   sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
   sf::RenderWindow window(sf::VideoMode({win.width, win.height}), win.title,
@@ -215,6 +244,7 @@ int main() {
   while (window.isOpen()) {
     float dt = clock.restart().asSeconds();
     entity.updateEntity(dt);
+    isCollided = collided(entity, tilemap);
     while (const std::optional<sf::Event> event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>()) {
         window.close();
