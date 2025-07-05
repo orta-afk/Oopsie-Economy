@@ -213,3 +213,29 @@ the tilemap is loading now it's time to get the collision down and some game pla
 ### 🧠 the plan that i have in my mind
   first i will get the collision down then i will just make bunch of variable which will edit player's states and yeah ig it's easy after this hope so the game looks ass rn frfr the player looks very small and the movement is ass as well and the code ughhh sucks!!!! truly spaghetti codde
 
+### 🌙 Midnight Chat – 11:20 PM  
+**⏳ Time Left: 1 Day, 22 Hours, some mins**
+
+Okay so, progress update:  
+Basic game is working!! Took me 1.5 days to get here, which—let’s be real—should’ve taken 1 hour if I was using an actual game engine 😩  
+BUT I enjoy the pain and like saying “I speak C++” so here we are lol. I am built different. I am weird. 👾
+
+Also… I’m feeling kinda lonely rn ngl 😭  
+Why am I typing this in the devlog?? Who knows. Someone hug me.
+
+---
+
+### 🧪 Game Jam Plan (Final Countdown)
+
+- [ ] ✅ **Get the basic gameplay loop done**  
+  _(Potion making system + core machine logic)_
+  
+- [ ] 🎨 **Polish it up**  
+  _(Add sound, menu, maybe some cute transitions or animations)_
+  
+- [ ] 💀 **If time magically exists, maybe: ENEMIES?!**  
+  _(Have ideas… do I have time? Probably not. Will I try anyway? Absolutely.)_
+
+--- 
+**OH FUCK I WANT A GIRLFRIEND PLS DATE ME!!!**  
+
