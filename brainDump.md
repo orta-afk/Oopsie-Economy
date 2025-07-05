@@ -124,7 +124,7 @@ I’ll refactor after the jam ends — that’s Future Me’s problem.
 Back to basics for now.
 
 ### Things that I know how to do but I’m procrastinating because I’m a sloth and a professional procrastinator:
-- [ ] Load the tilemap (hmm i can't think of smt else rn yeah wish me luck chat!!!)
+- [x] Load the tilemap (hmm i can't think of smt else rn yeah wish me luck chat!!!)
 
 > also new hatsune miku albums are so fire omg
 
@@ -178,7 +178,7 @@ That means:
 
 ### Sooo How Do I Interpolate the Theme?
 
-**BINGO — here's the core loop:**
+🎰 **BINGO — here's the core loop:**
 
 You're stuck inside trying to make the perfect love potion.
 
@@ -200,3 +200,15 @@ If I somehow finish early maybe I’ll throw in some weak-ass enemies or frogs o
 Let’s get this thing going.  
 Hell yeah.  
 I’m feeling **so creatively horny rn** LET’S GO.
+
+### 🗣️ devlog (small chat)
+***ok so uhh fuck 2 days 13 hrs left*** ⏲️❗
+
+the tilemap is loading now it's time to get the collision down and some game play game play is lit dead and i hate my school fuck those bitch'o ass they know nothing fucking bunch of dickheads yuck man i wanna be smt asap to escape this hell
+
+## ☑️ today's todo ->
+  - [ ] get the collision working
+  - [ ] basic gameplay done maybe just the brewing
+
+### 🧠 the plan that i have in my mind
+  first i will get the collision down then i will just make bunch of variable which will edit player's states and yeah ig it's easy after this hope so the game looks ass rn frfr the player looks very small and the movement is ass as well and the code ughhh sucks!!!! truly spaghetti codde
