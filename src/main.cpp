@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+#include <cmath>
 #include <iostream>
 #include <optional>
 #include <unordered_map>
@@ -18,19 +19,16 @@ struct window {
 struct EntityStuff {
   sf::Vector2f velocity = {0.f, 0.f};
   sf::Vector2f positions = {100.f, 100.f};
-  float g = 800.f;          
-  float jumpVelocity = 400.f;
-  float max_g = 1200.f; 
-  float speed = 200.f;
-  float friction = 0.3f;
+  bool onGrounentityStuff;
+  float g = 1200.f;    
+  float jumpVelocity = 480.f;
+  float max_g = 2000.f;
+  float speed = 350.f;       
   int XIndex = 26;
-  int YIndex = 0; 
-  int spriteSize = 16; 
-  bool canJump;
+  int YIndex = 0;
+  int spriteSize = 16;
+  bool canJump = false;
 };
-
-
-// 18
 
 enum class tiles : int {
   background = 0,
@@ -79,6 +77,8 @@ public:
     move(dt);
     gravity(dt, isCollided);
     entityBounds();
+    resloveCollision(isCollided);
+    jump(dt);
     entityStuff.positions += entityStuff.velocity * dt;
     Entitysprite.setPosition(entityStuff.positions);
   }
@@ -89,32 +89,65 @@ public:
   }
 
 private:
-  void gravity(float dt, bool collided){
-    if(!collided){
-      entityStuff.velocity.y += entityStuff.g * dt;
-      if(entityStuff.velocity.y > entityStuff.max_g){
-        entityStuff.velocity.y = entityStuff.max_g;
-        entityStuff.canJump = false;
+  void resloveCollision(bool colliided){
+    if (colliided) {
+      if (entityStuff.velocity.y > 0) {
+        entityStuff.velocity.y = 0;
+        entityStuff.positions.y = std::floor(entityStuff.positions.y / TILESIZE) * TILESIZE;
       }
-    }else{
-      entityStuff.canJump = true;
-      entityStuff.velocity.y = 0.f;
+      entityStuff.onGrounentityStuff = true;
+    } else {
+      entityStuff.onGrounentityStuff = false;
     }
   }
-  
-  void move(float dt) {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-      entityStuff.velocity.x += entityStuff.speed * dt;
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-      entityStuff.velocity.x -= entityStuff.speed * dt;
-    else
-      entityStuff.velocity.x = 0;
-
-    if (entityStuff.canJump && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-      entityStuff.velocity.y = -entityStuff.jumpVelocity; 
-      entityStuff.canJump = false; 
+  void gravity(float dt, bool collided) {
+    if (!entityStuff.onGrounentityStuff) {
+      entityStuff.velocity.y += entityStuff.g * dt;
+      if (entityStuff.velocity.y > entityStuff.max_g) {
+        entityStuff.velocity.y = entityStuff.max_g;
+      }
     }
- }
+  }
+
+  void move(float dt) {
+    float acceleration = 4000.f;
+    float maxSpeed = entityStuff.speed;
+    float friction = 5000.f; 
+
+    float targetSpeed = 0.f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+      targetSpeed += maxSpeed;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+      targetSpeed -= maxSpeed;
+
+    if (entityStuff.velocity.x < targetSpeed)
+      entityStuff.velocity.x =
+          std::min(entityStuff.velocity.x + acceleration * dt, targetSpeed);
+    else if (entityStuff.velocity.x > targetSpeed)
+      entityStuff.velocity.x =
+          std::max(entityStuff.velocity.x - acceleration * dt, targetSpeed);
+
+    if (targetSpeed == 0.f) {
+      if (entityStuff.velocity.x > 0.f) {
+        entityStuff.velocity.x -= friction * dt;
+        if (entityStuff.velocity.x < 0.f)
+          entityStuff.velocity.x = 0.f;
+      } else if (entityStuff.velocity.x < 0.f) {
+        entityStuff.velocity.x += friction * dt;
+        if (entityStuff.velocity.x > 0.f)
+          entityStuff.velocity.x = 0.f;
+      }
+    }
+  }
+
+  void jump(float dt) {
+    if (entityStuff.onGrounentityStuff && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
+      entityStuff.velocity.y -= entityStuff.jumpVelocity;
+      entityStuff.canJump = false;
+    } else {
+      entityStuff.canJump = true;
+    }
+  }
 
   EntityStuff entityStuff;
   sf::Sprite Entitysprite;

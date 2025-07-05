@@ -207,7 +207,7 @@ I’m feeling **so creatively horny rn** LET’S GO.
 the tilemap is loading now it's time to get the collision down and some game play game play is lit dead and i hate my school fuck those bitch'o ass they know nothing fucking bunch of dickheads yuck man i wanna be smt asap to escape this hell
 
 ## ☑️ today's todo ->
-  - [ ] get the collision working
+  - [x] get the collision working
   - [ ] basic gameplay done maybe just the brewing
 
 ### 🧠 the plan that i have in my mind
