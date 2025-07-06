@@ -85,7 +85,6 @@ public:
     gravity(dt); 
     entityBounds();
     resolveCollision(type);
-    // applyFriction(dt);
     jump(dt);
     entityStuff.positions += entityStuff.velocity * dt;
     Entitysprite.setPosition(entityStuff.positions);
@@ -95,21 +94,33 @@ public:
 
 private:
   void resolveCollision(collisionType type) {
-      switch (type) {
-      case collisionType::RightWall:
-          entityStuff.velocity.x = 0;
-          std::cout << "your mom";
-          break;
-      case collisionType::None:
-          entityStuff.onGround = false;
-          break;
-      case collisionType::bottomGround:
-          entityStuff.velocity.y = 0;
-          entityStuff.onGround = true;
-          entityStuff.canJump = true;  
-          entityStuff.positions.y = std::floor(entityStuff.positions.y / TILESIZE) * TILESIZE;
-          break;
+    switch (type) {
+    case collisionType::RightWall:
+      entityStuff.velocity.x = 0;
+
+      // snap X position to tile edge
+      if (entityStuff.velocity.x > 0) {
+        entityStuff.positions.x =
+            std::floor(entityStuff.positions.x / TILESIZE) * TILESIZE;
+      } else if (entityStuff.velocity.x < 0) {
+        entityStuff.positions.x =
+            std::ceil(entityStuff.positions.x / TILESIZE) * TILESIZE;
       }
+      break;
+
+    case collisionType::None:
+      entityStuff.onGround = false;
+      break;
+
+    case collisionType::bottomGround:
+      entityStuff.velocity.y = 0;
+      entityStuff.onGround = true;
+      entityStuff.canJump = true;
+
+      entityStuff.positions.y =
+          std::floor(entityStuff.positions.y / TILESIZE) * TILESIZE;
+      break;
+    }
   }
 
   void gravity(float dt) {
@@ -137,7 +148,6 @@ private:
     else if (entityStuff.velocity.x > targetSpeed)
       entityStuff.velocity.x = std::max(entityStuff.velocity.x - acceleration * dt, targetSpeed);
 
-    // optional: deadzone to zero out tiny velocity
     if (std::abs(entityStuff.velocity.x) < 5.f)
       entityStuff.velocity.x = 0.f;
   }
@@ -149,17 +159,6 @@ private:
           entityStuff.onGround = false;
       }
   }  
-  void applyFriction(float dt) {
-    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) &&
-        !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-      float decel = entityStuff.friction * dt;
-      if (entityStuff.velocity.x > 0.f) {
-        entityStuff.velocity.x = std::max(0.f, entityStuff.velocity.x - decel);
-      } else if (entityStuff.velocity.x < 0.f) {
-        entityStuff.velocity.x = std::min(0.f, entityStuff.velocity.x + decel);
-      }
-    }
-  }
 
   EntityStuff entityStuff;
   sf::Sprite Entitysprite;
