@@ -246,3 +246,5 @@ did nothing frfr time to lock in now
 ### to-do
 - [ ] make the game look good
 - [ ] get the basic game loop done
+
+> ohh fucking hell i am still stuck with this basic shits i don't think i can i don't think so
