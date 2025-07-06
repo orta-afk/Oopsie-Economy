@@ -1,3 +1,5 @@
+#include "SFML/System/Vector2.hpp"
+#include "SFML/Window/Keyboard.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
@@ -18,12 +20,13 @@ struct window {
 
 struct EntityStuff {
   sf::Vector2f velocity = {0.f, 0.f};
-  sf::Vector2f positions = {100.f, 100.f};
+  sf::Vector2f positions;
   bool onGrounentityStuff;
-  float g = 1200.f;    
-  float jumpVelocity = 480.f;
+  float g = 1200.f;
+  float jumpVelocity = 300.f;
   float max_g = 2000.f;
-  float speed = 350.f;       
+  float speed = 250.f;
+  float friction = 0.7f;
   int XIndex = 26;
   int YIndex = 0;
   int spriteSize = 16;
@@ -32,19 +35,22 @@ struct EntityStuff {
 
 enum class tiles : int {
   background = 0,
-  topLeftCorner,
   topMiddleTile,
-  topRightCorner,
-  middleLeft,
-  middleRight,
-  bottomLeftCorner,
   bottomMiddleTile,
-  bottomRightCorner,
+  pillertop,
+  pillerMiddle,
+  pillerBottom,
 };
 
 struct indexs {
   int x;
   int y;
+};
+
+enum class collisionType : int{
+  None,
+  RightWall,
+  bottomGround,
 };
 
 class Entity : public sf::Drawable, public sf::Transformable {
@@ -62,8 +68,8 @@ public:
     } else {
       Entitysprite.setTexture(Entitytexture);
       Entitysprite.setTextureRect(rect);
-      Entitysprite.setPosition({100, 100});
-      entityStuff.positions = {100, 100};
+      entityStuff.positions = {(5 + (54 - 5) / 2) * TILESIZE, (10 + (22 - 10) / 2) * TILESIZE};
+      Entitysprite.setPosition({entityStuff.positions});
     }
 
     int x = entityStuff.XIndex * entityStuff.spriteSize;
@@ -73,34 +79,45 @@ public:
     }
   }
 
-  void updateEntity(float dt, bool isCollided) {
+  void updateEntity(float dt, collisionType type) {
     move(dt);
-    gravity(dt, isCollided);
+    gravity(dt, type); 
     entityBounds();
-    resloveCollision(isCollided);
+    resloveCollision(type);
+    applyFriction(dt);
     jump(dt);
     entityStuff.positions += entityStuff.velocity * dt;
     Entitysprite.setPosition(entityStuff.positions);
   }
-
 public:
-  sf::FloatRect entityBounds(){
-    return Entitysprite.getGlobalBounds();
-  }
+  sf::FloatRect entityBounds() { return Entitysprite.getGlobalBounds(); }
 
 private:
-  void resloveCollision(bool colliided){
-    if (colliided) {
-      if (entityStuff.velocity.y > 0) {
+  void resloveCollision(collisionType type) {
+    switch (type) {
+      case collisionType::RightWall:
+        if(entityStuff.velocity.x < 0){
+          entityStuff.velocity.x = 0;
+          entityStuff.positions.x = std::ceil(entityStuff.positions.x / TILESIZE) * TILESIZE;
+        }
+        if(entityStuff.velocity.x > 0){
+          entityStuff.velocity.x = 0;
+          entityStuff.positions.x = std::floor(entityStuff.positions.x / TILESIZE) * TILESIZE;
+        }
+        break;
+      case collisionType::None:
+        entityStuff.onGrounentityStuff = false;
+        break;
+      case collisionType::bottomGround:
         entityStuff.velocity.y = 0;
-        entityStuff.positions.y = std::floor(entityStuff.positions.y / TILESIZE) * TILESIZE;
-      }
-      entityStuff.onGrounentityStuff = true;
-    } else {
-      entityStuff.onGrounentityStuff = false;
+        entityStuff.positions.y =
+            std::floor(entityStuff.positions.y / TILESIZE) * TILESIZE;
+        entityStuff.onGrounentityStuff = true;
+        break;
     }
   }
-  void gravity(float dt, bool collided) {
+
+  void gravity(float dt, collisionType collided) {
     if (!entityStuff.onGrounentityStuff) {
       entityStuff.velocity.y += entityStuff.g * dt;
       if (entityStuff.velocity.y > entityStuff.max_g) {
@@ -108,11 +125,10 @@ private:
       }
     }
   }
-
   void move(float dt) {
     float acceleration = 4000.f;
     float maxSpeed = entityStuff.speed;
-    float friction = 5000.f; 
+    float friction = 5000.f;
 
     float targetSpeed = 0.f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
@@ -141,11 +157,24 @@ private:
   }
 
   void jump(float dt) {
-    if (entityStuff.onGrounentityStuff && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
+    if (entityStuff.onGrounentityStuff &&
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
       entityStuff.velocity.y -= entityStuff.jumpVelocity;
       entityStuff.canJump = false;
     } else {
       entityStuff.canJump = true;
+    }
+  }
+  
+  void applyFriction(float dt) {
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) &&
+        !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
+      if (entityStuff.canJump) {
+        entityStuff.velocity.x -=
+            entityStuff.velocity.x * entityStuff.friction * dt * 6.0f;
+        if (std::abs(entityStuff.velocity.x) < 5.f)
+          entityStuff.velocity.x = 0.f;
+      }
     }
   }
 
@@ -161,48 +190,53 @@ private:
 class Tilemap : public sf::Drawable, public sf::Transformable {
 public:
   Tilemap() : vert(sf::PrimitiveType::Triangles, 3) { initTilemap(); }
-  void initTilemap(){
-    if(!texture.loadFromFile("../assets/colored-transparent_packed.png")){
+  void initTilemap() {
+    if (!texture.loadFromFile("../assets/colored-transparent_packed.png")) {
       std::cout << "FUUCKKKKKKK!!!!!! \n";
     }
     int tilePerRow = texture.getSize().x / TILESIZE;
 
+    const int boxTop = 10;
+    const int boxBottom = 22;
+    const int leftCol = 5;
+    const int rightCol = mapWidth - 6;
+
     for (int j = 0; j < mapHeight; ++j) {
       for (int i = 0; i < mapWidth; ++i) {
         int tile = getTileIndex(tiles::background, tilePerRow);
-
-        if (j == 28) {
-          if (i == 5)
-            tile = getTileIndex(tiles::topLeftCorner, tilePerRow);
-          else if (i == mapWidth - 6)
-            tile = getTileIndex(tiles::topRightCorner, tilePerRow);
-          else if (i > 5 && i < mapWidth - 6)
-            tile = getTileIndex(tiles::topMiddleTile, tilePerRow);
-        } else if (j > 28 && j < mapHeight - 1) {
-          if (i == 5)
-            tile = getTileIndex(tiles::middleLeft, tilePerRow);
-          else if (i == mapWidth - 6)
-            tile = getTileIndex(tiles::middleRight, tilePerRow);
-        } else if (j == mapHeight - 1) {
-          if (i == 5)
-            tile = getTileIndex(tiles::bottomLeftCorner, tilePerRow);
-          else if (i == mapWidth - 6)
-            tile = getTileIndex(tiles::bottomRightCorner, tilePerRow);
-          else if (i > 5 && i < mapWidth - 6)
+        if (j == boxTop) {
+          if (i == leftCol)
+            tile = getTileIndex(tiles::pillertop, tilePerRow);
+          else if (i == rightCol)
+            tile = getTileIndex(tiles::pillertop, tilePerRow);
+          else if (i > leftCol && i < rightCol)
             tile = getTileIndex(tiles::bottomMiddleTile, tilePerRow);
+        } else if (j > boxTop && j < boxBottom) {
+          if (i == leftCol)
+            tile = getTileIndex(tiles::pillerMiddle, tilePerRow);
+          else if (i == rightCol)
+            tile = getTileIndex(tiles::pillerMiddle, tilePerRow);
+        } else if (j == boxBottom) {
+          if (i == leftCol)
+            tile = getTileIndex(tiles::pillerBottom, tilePerRow);
+          else if (i == rightCol)
+            tile = getTileIndex(tiles::pillerBottom, tilePerRow);
+          else if (i > leftCol && i < rightCol)
+            tile = getTileIndex(tiles::topMiddleTile, tilePerRow);
         }
+
         map[j][i] = tile;
       }
     }
   }
-  
+
   void updateTilemap() {
     vert.clear();
     vert.setPrimitiveType(sf::PrimitiveType::Triangles);
     vert.resize(mapWidth * mapHeight * 6);
     for (int j = 0; j < mapHeight; j++) {
       for (int i = 0; i < mapWidth; i++) {
-        const int index = map[j][i]; 
+        const int index = map[j][i];
         const int tu = index % (texture.getSize().x / 16);
         const int tv = index / (texture.getSize().x / 16);
         sf::Vertex *triangles = &vert[(i + j * mapWidth) * 6];
@@ -212,44 +246,40 @@ public:
         triangles[2].position = sf::Vector2f(i * TILESIZE, (j + 1) * TILESIZE);
         triangles[3].position = sf::Vector2f(i * TILESIZE, (j + 1) * TILESIZE);
         triangles[4].position = sf::Vector2f((i + 1) * TILESIZE, j * TILESIZE);
-        triangles[5].position = sf::Vector2f((i + 1) * TILESIZE, (j + 1) * TILESIZE);
+        triangles[5].position =
+            sf::Vector2f((i + 1) * TILESIZE, (j + 1) * TILESIZE);
 
         triangles[0].texCoords = sf::Vector2f(tu * TILESIZE, tv * TILESIZE);
-        triangles[1].texCoords = sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
-        triangles[2].texCoords = sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
-        triangles[3].texCoords = sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
-        triangles[4].texCoords = sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
-        triangles[5].texCoords = sf::Vector2f((tu + 1) * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[1].texCoords =
+            sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
+        triangles[2].texCoords =
+            sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[3].texCoords =
+            sf::Vector2f(tu * TILESIZE, (tv + 1) * TILESIZE);
+        triangles[4].texCoords =
+            sf::Vector2f((tu + 1) * TILESIZE, tv * TILESIZE);
+        triangles[5].texCoords =
+            sf::Vector2f((tu + 1) * TILESIZE, (tv + 1) * TILESIZE);
       }
     }
   }
 
 public:
-  sf::FloatRect getTileBounds(){
-    return vert.getBounds();
-  }
-  
+  sf::FloatRect getTileBounds() { return vert.getBounds(); }
+
 public:
   int getTileIndex(tiles t, int tilesPerRow) {
     indexs coords = mapIndex.at(t);
     return coords.x + coords.y * tilesPerRow;
   }
 
-  int getTileperRow(){
-    return texture.getSize().x/TILESIZE;
-  }
+  int getTileperRow() { return texture.getSize().x / TILESIZE; }
 
-  int getTileAt(int x, int y){
-    return map[y][x];
-  }
+  int getTileAt(int x, int y) { return map[y][x]; }
 
-  int getMapWidth(){
-    return mapWidth;
-  }
+  int getMapWidth() { return mapWidth; }
 
-  int getMapHeight(){
-  return mapHeight;
-}  
+  int getMapHeight() { return mapHeight; }
 
 private:
   const static int mapWidth = 60;
@@ -263,34 +293,44 @@ private:
     target.draw(vert, states);
   };
   std::unordered_map<tiles, indexs> mapIndex = {
-    {tiles::background, {0, 0}},
-    {tiles::topLeftCorner, {18, 0}},
-    {tiles::topMiddleTile, {19, 0}},
-    {tiles::topRightCorner, {20, 0}}, 
-    {tiles::middleLeft, {18, 1}},
-    {tiles::middleRight, {20, 1}},
-    {tiles::bottomLeftCorner, {18, 2}},
-    {tiles::bottomMiddleTile, {19, 2}},
-    {tiles::bottomRightCorner, {20, 2}},
+      {tiles::background, {0, 0}},         
+      {tiles::topMiddleTile, {19, 0}},     
+      {tiles::bottomMiddleTile, {19, 2}},
+      {tiles::pillertop, {3, 11}},
+      {tiles::pillerMiddle, {3, 12}},
+      {tiles::pillerBottom, {3, 13}},
   };
 };
 
-bool collided(Entity& e, Tilemap& t){
-  for(int j = 0; j < t.getMapHeight(); j++){
-    for(int i = 0; i < t.getMapWidth(); i++){
+collisionType collided(Entity &e, Tilemap &t) {
+  for (int j = 0; j < t.getMapHeight(); j++) {
+    for (int i = 0; i < t.getMapWidth(); i++) {
       int TileIndex = t.getTileAt(i, j);
       int tileperRow = t.getTileperRow();
-      sf::FloatRect tilemapBounds({static_cast<float>(i)*TILESIZE, static_cast<float>(j)*TILESIZE},{TILESIZE,TILESIZE});
+      sf::FloatRect tilemapBounds(
+          {static_cast<float>(i) * TILESIZE, static_cast<float>(j) * TILESIZE},
+          {TILESIZE, TILESIZE});
       if (e.entityBounds().findIntersection(tilemapBounds)) {
-        if (TileIndex == t.getTileIndex(tiles::background, tileperRow)) {
-          isblah = false;
+        if(TileIndex == t.getTileIndex(tiles::background, tileperRow)){
+          return collisionType::None;
+        } else if (TileIndex ==
+                       t.getTileIndex(tiles::bottomMiddleTile, tileperRow) ||
+                   TileIndex ==
+                       t.getTileIndex(
+                           tiles::topMiddleTile,
+                           tileperRow ||
+                               TileIndex == t.getTileIndex(tiles::pillerBottom,
+                                                           tileperRow) ||
+                               TileIndex == t.getTileIndex(tiles::pillertop,
+                                                           tileperRow))) {
+          return collisionType::bottomGround;
         } else {
-          isblah = true;
+          return collisionType::RightWall;
         }
       }
     }
   }
-  return isblah;
+  return collisionType::None;
 }
 
 int main() {
@@ -298,6 +338,7 @@ int main() {
   Entity entity;
   Tilemap tilemap;
   bool isCollided = false;
+  collisionType type = collisionType::None;
 
   sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
   sf::RenderWindow window(sf::VideoMode({win.width, win.height}), win.title,
@@ -313,8 +354,8 @@ int main() {
   sf::Clock clock;
   while (window.isOpen()) {
     float dt = clock.restart().asSeconds();
-    entity.updateEntity(dt, isCollided);
-    isCollided = collided(entity, tilemap);
+    type = collided(entity, tilemap);
+    entity.updateEntity(dt, type);
     while (const std::optional<sf::Event> event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>()) {
         window.close();
@@ -326,3 +367,4 @@ int main() {
     window.display();
   }
 }
+// todo - refactor this code later <- 12:00 pm almost dead

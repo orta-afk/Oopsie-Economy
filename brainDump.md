@@ -239,3 +239,10 @@ Why am I typing this in the devlog?? Who knows. Someone hug me.
 --- 
 **OH FUCK I WANT A GIRLFRIEND PLS DATE ME!!!**  
 
+# WE’RE IN THE FINAL ARC, BABY. 
+**⏳ Time Left: 1 Day, 12 Hours, some mins**
+
+did nothing frfr time to lock in now
+### to-do
+- [ ] make the game look good
+- [ ] get the basic game loop done
