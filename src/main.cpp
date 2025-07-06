@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <optional>
@@ -21,7 +22,7 @@ struct window {
 struct EntityStuff {
   sf::Vector2f velocity = {0.f, 0.f};
   sf::Vector2f positions;
-  bool onGrounentityStuff;
+  bool onGround;
   float g = 1200.f;
   float jumpVelocity = 300.f;
   float max_g = 2000.f;
@@ -81,10 +82,10 @@ public:
 
   void updateEntity(float dt, collisionType type) {
     move(dt);
-    gravity(dt, type); 
+    gravity(dt); 
     entityBounds();
-    resloveCollision(type);
-    applyFriction(dt);
+    resolveCollision(type);
+    // applyFriction(dt);
     jump(dt);
     entityStuff.positions += entityStuff.velocity * dt;
     Entitysprite.setPosition(entityStuff.positions);
@@ -93,87 +94,69 @@ public:
   sf::FloatRect entityBounds() { return Entitysprite.getGlobalBounds(); }
 
 private:
-  void resloveCollision(collisionType type) {
-    switch (type) {
+  void resolveCollision(collisionType type) {
+      switch (type) {
       case collisionType::RightWall:
-        if(entityStuff.velocity.x < 0){
           entityStuff.velocity.x = 0;
-          entityStuff.positions.x = std::ceil(entityStuff.positions.x / TILESIZE) * TILESIZE;
-        }
-        if(entityStuff.velocity.x > 0){
-          entityStuff.velocity.x = 0;
-          entityStuff.positions.x = std::floor(entityStuff.positions.x / TILESIZE) * TILESIZE;
-        }
-        break;
+          std::cout << "your mom";
+          break;
       case collisionType::None:
-        entityStuff.onGrounentityStuff = false;
-        break;
+          entityStuff.onGround = false;
+          break;
       case collisionType::bottomGround:
-        entityStuff.velocity.y = 0;
-        entityStuff.positions.y =
-            std::floor(entityStuff.positions.y / TILESIZE) * TILESIZE;
-        entityStuff.onGrounentityStuff = true;
-        break;
-    }
+          entityStuff.velocity.y = 0;
+          entityStuff.onGround = true;
+          entityStuff.canJump = true;  
+          entityStuff.positions.y = std::floor(entityStuff.positions.y / TILESIZE) * TILESIZE;
+          break;
+      }
   }
 
-  void gravity(float dt, collisionType collided) {
-    if (!entityStuff.onGrounentityStuff) {
-      entityStuff.velocity.y += entityStuff.g * dt;
-      if (entityStuff.velocity.y > entityStuff.max_g) {
-        entityStuff.velocity.y = entityStuff.max_g;
+  void gravity(float dt) {
+      if (!entityStuff.onGround) {
+          entityStuff.velocity.y += entityStuff.g * dt;
+          if (entityStuff.velocity.y > entityStuff.max_g) {
+              entityStuff.velocity.y = entityStuff.max_g;
+          }
       }
-    }
   }
+
   void move(float dt) {
     float acceleration = 4000.f;
     float maxSpeed = entityStuff.speed;
-    float friction = 5000.f;
 
     float targetSpeed = 0.f;
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
       targetSpeed += maxSpeed;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
       targetSpeed -= maxSpeed;
 
     if (entityStuff.velocity.x < targetSpeed)
-      entityStuff.velocity.x =
-          std::min(entityStuff.velocity.x + acceleration * dt, targetSpeed);
+      entityStuff.velocity.x = std::min(entityStuff.velocity.x + acceleration * dt, targetSpeed);
     else if (entityStuff.velocity.x > targetSpeed)
-      entityStuff.velocity.x =
-          std::max(entityStuff.velocity.x - acceleration * dt, targetSpeed);
+      entityStuff.velocity.x = std::max(entityStuff.velocity.x - acceleration * dt, targetSpeed);
 
-    if (targetSpeed == 0.f) {
-      if (entityStuff.velocity.x > 0.f) {
-        entityStuff.velocity.x -= friction * dt;
-        if (entityStuff.velocity.x < 0.f)
-          entityStuff.velocity.x = 0.f;
-      } else if (entityStuff.velocity.x < 0.f) {
-        entityStuff.velocity.x += friction * dt;
-        if (entityStuff.velocity.x > 0.f)
-          entityStuff.velocity.x = 0.f;
-      }
-    }
+    // optional: deadzone to zero out tiny velocity
+    if (std::abs(entityStuff.velocity.x) < 5.f)
+      entityStuff.velocity.x = 0.f;
   }
 
   void jump(float dt) {
-    if (entityStuff.onGrounentityStuff &&
-        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-      entityStuff.velocity.y -= entityStuff.jumpVelocity;
-      entityStuff.canJump = false;
-    } else {
-      entityStuff.canJump = true;
-    }
-  }
-  
+      if (entityStuff.onGround && entityStuff.canJump && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
+          entityStuff.velocity.y -= entityStuff.jumpVelocity;
+          entityStuff.canJump = false;
+          entityStuff.onGround = false;
+      }
+  }  
   void applyFriction(float dt) {
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) &&
         !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-      if (entityStuff.canJump) {
-        entityStuff.velocity.x -=
-            entityStuff.velocity.x * entityStuff.friction * dt * 6.0f;
-        if (std::abs(entityStuff.velocity.x) < 5.f)
-          entityStuff.velocity.x = 0.f;
+      float decel = entityStuff.friction * dt;
+      if (entityStuff.velocity.x > 0.f) {
+        entityStuff.velocity.x = std::max(0.f, entityStuff.velocity.x - decel);
+      } else if (entityStuff.velocity.x < 0.f) {
+        entityStuff.velocity.x = std::min(0.f, entityStuff.velocity.x + decel);
       }
     }
   }
@@ -303,35 +286,51 @@ private:
 };
 
 collisionType collided(Entity &e, Tilemap &t) {
-  for (int j = 0; j < t.getMapHeight(); j++) {
-    for (int i = 0; i < t.getMapWidth(); i++) {
+  collisionType finalType = collisionType::None;
+  float minOverlap = std::numeric_limits<float>::max();
+
+  auto entityRect = e.entityBounds();
+
+  for (int j = 0; j < t.getMapHeight(); ++j) {
+    for (int i = 0; i < t.getMapWidth(); ++i) {
       int TileIndex = t.getTileAt(i, j);
       int tileperRow = t.getTileperRow();
-      sf::FloatRect tilemapBounds(
+
+      if (TileIndex == t.getTileIndex(tiles::background, tileperRow))
+        continue;
+
+      sf::FloatRect tileRect(
           {static_cast<float>(i) * TILESIZE, static_cast<float>(j) * TILESIZE},
           {TILESIZE, TILESIZE});
-      if (e.entityBounds().findIntersection(tilemapBounds)) {
-        if(TileIndex == t.getTileIndex(tiles::background, tileperRow)){
-          return collisionType::None;
-        } else if (TileIndex ==
-                       t.getTileIndex(tiles::bottomMiddleTile, tileperRow) ||
-                   TileIndex ==
-                       t.getTileIndex(
-                           tiles::topMiddleTile,
-                           tileperRow ||
-                               TileIndex == t.getTileIndex(tiles::pillerBottom,
-                                                           tileperRow) ||
-                               TileIndex == t.getTileIndex(tiles::pillertop,
-                                                           tileperRow))) {
-          return collisionType::bottomGround;
+
+      auto intersect = entityRect.findIntersection(tileRect);
+      if (intersect.has_value()) {
+        sf::Vector2f overlap = intersect->size;
+
+        if (overlap.x < overlap.y) {
+          if (entityRect.position.x < tileRect.position.x)
+            finalType = collisionType::RightWall;
+          else
+            finalType = collisionType::RightWall;
+
+          if (overlap.x < minOverlap)
+            minOverlap = overlap.x;
         } else {
-          return collisionType::RightWall;
+          if (entityRect.position.y < tileRect.position.y)
+            finalType = collisionType::bottomGround;
+          else
+            finalType = collisionType::bottomGround;
+
+          if (overlap.y < minOverlap)
+            minOverlap = overlap.y;
         }
       }
     }
   }
-  return collisionType::None;
+
+  return finalType;
 }
+
 
 int main() {
   window win;
