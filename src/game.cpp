@@ -2,7 +2,9 @@
 
 Game::Game(){
   initGame();
+  initStuff();
 }
+
 void Game::initGame(){
   win.width = 960;
   win.height = 540;
@@ -13,6 +15,8 @@ void Game::initGame(){
   window->setPosition(sf::Vector2i(getDesktopSize.x/2 - getWindowSize.x/2, getDesktopSize.y/2 - getWindowSize.y/2));
   window->setVerticalSyncEnabled(true);
 }
+
+void Game::initStuff(){}
 
 void Game::updateGame(){
   while(const std::optional<sf::Event>event = window->pollEvent()){
@@ -29,6 +33,7 @@ void Game::updateGame(){
 
 void Game::renderGame(){
   window->clear(sf::Color::Black);
+  window->draw(entity);
   window->display();  
 }
 

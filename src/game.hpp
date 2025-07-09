@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
+#include "entity.hpp"
+
 struct windowData{
   unsigned int width;
   unsigned int height;
@@ -26,4 +28,7 @@ private:
   windowData win;
   sf::RenderWindow* window;
   sf::VideoMode videoMode;
+
+private:
+  Entity entity;
 };
