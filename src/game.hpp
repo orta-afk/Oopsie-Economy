@@ -4,12 +4,15 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
+#include "SFML/System/Clock.hpp"
 #include "entity.hpp"
+#include "tilemap.hpp"
 
 struct windowData{
   unsigned int width;
   unsigned int height;
   const char* title;  
+  float dt;
 };
 
 class Game{
@@ -26,9 +29,11 @@ private:
 
 private:
   windowData win;
+  sf::Clock clock;
   sf::RenderWindow* window;
   sf::VideoMode videoMode;
 
 private:
+  Tilemap tilemap;
   Entity entity;
 };

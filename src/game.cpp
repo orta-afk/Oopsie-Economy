@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "SFML/System/Clock.hpp"
 
 Game::Game(){
   initGame();
@@ -7,7 +8,7 @@ Game::Game(){
 
 void Game::initGame(){
   win.width = 960;
-  win.height = 540;
+  win.height = 528;
   win.title = "shit";
   window = new sf::RenderWindow(sf::VideoMode({win.width, win.height}), win.title, sf::Style::Titlebar | sf::Style::Close, sf::State::Windowed);
   sf::Vector2i getDesktopSize = (sf::Vector2i)videoMode.getDesktopMode().size;
@@ -16,9 +17,15 @@ void Game::initGame(){
   window->setVerticalSyncEnabled(true);
 }
 
-void Game::initStuff(){}
+void Game::initStuff(){
+  entity.initEntity();
+  tilemap.initTilemap();
+  tilemap.updateTilemap();
+}
 
 void Game::updateGame(){
+  win.dt = clock.restart().asSeconds();
+  entity.updateEntity(win.dt);
   while(const std::optional<sf::Event>event = window->pollEvent()){
     if(event->is<sf::Event::Closed>()){
       window->close();
@@ -34,6 +41,7 @@ void Game::updateGame(){
 void Game::renderGame(){
   window->clear(sf::Color::Black);
   window->draw(entity);
+  window->draw(tilemap);
   window->display();  
 }
 
