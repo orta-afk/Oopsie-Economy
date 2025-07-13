@@ -1,4 +1,7 @@
 #include "entity.hpp"
+#include "SFML/Graphics/Rect.hpp"
+#include "collisionLayer.hpp"
+#include <vector>
 
 Entity::Entity(){
   initEntity();
@@ -18,6 +21,8 @@ void Entity::initEntity(){
   ed.maxSpeed = 300;
   ed.accelRate = 230;
   ed.friction = 400;
+  ed.gravity = 400;
+  ed.maxGravity = 500;
 }
 
 void Entity::initTexture(){
@@ -31,6 +36,27 @@ void Entity::initTexture(){
     et.texture.setSmooth(false);
     et.sprite.setPosition(ed.position);
   }
+}
+
+sf::FloatRect Entity::getBoundingBox(){
+  ed.entityBoundingBox = et.sprite.getGlobalBounds();
+  return ed.entityBoundingBox;
+}
+
+void Entity::setLayer(collisionLayer collisionlayer){
+  entityCollisonLayer = collisionlayer;
+}
+
+void Entity::setMask(const std::vector<collisionLayer>& m) {
+  entityCollisionMask = m;
+}
+
+collisionLayer Entity::getLayer(){
+  return entityCollisonLayer;
+}
+
+std::vector<collisionLayer> Entity::getMask(){
+  return entityCollisionMask;
 }
 
 void Entity::move(float dt){
@@ -51,25 +77,32 @@ void Entity::move(float dt){
       if (ed.velocity.x < 0) {
         ed.velocity.x = 0;
       }
-      if (ed.velocity.x < 0) {
-        ed.velocity.x += ed.friction * dt;
-        if (ed.velocity.x > 0) {
-          ed.velocity.x = 0;
-        }
+    }
+    if (ed.velocity.x < 0) {
+      ed.velocity.x += ed.friction * dt;
+      if (ed.velocity.x > 0) {
+        ed.velocity.x = 0;
       }
     }
   }
 }
 
-
+void Entity::gravity(float dt){
+  ed.velocity.y += ed.gravity * dt;
+  if(ed.velocity.y > ed.maxGravity){
+    ed.velocity.y = ed.maxGravity;
+  }
+}
 
 void Entity::updateEntity(float dt){
   move(dt);
+  gravity(dt);
   ed.position += ed.velocity * dt;
   et.sprite.setPosition(ed.position);
+  getBoundingBox();
 }
 
 void Entity::draw(sf::RenderTarget& target, sf::RenderStates states) const{
-  target.draw(et.sprite);
+  target.draw(et.sprite, states);
 }
 

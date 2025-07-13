@@ -3,10 +3,11 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <SFML/System.hpp>
 
-#include "SFML/System/Clock.hpp"
 #include "entity.hpp"
 #include "tilemap.hpp"
+#include "sat.hpp"
 
 struct windowData{
   unsigned int width;
@@ -34,6 +35,7 @@ private:
   sf::VideoMode videoMode;
 
 private:
+  Sat sat;
   Tilemap tilemap;
   Entity entity;
 };

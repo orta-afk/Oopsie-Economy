@@ -2,6 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
+#include "SFML/System/Vector2.hpp"
+#include "collisionLayer.hpp"
+
 
 struct entityData{
   sf::Vector2f position;
@@ -11,6 +15,9 @@ struct entityData{
   int maxSpeed;
   int friction;
   int accelRate;
+  int gravity;
+  int maxGravity;
+  sf::FloatRect entityBoundingBox;
 };
 
 struct entityTexture{
@@ -30,12 +37,22 @@ public:
   void initEntity();
   void updateEntity(float dt);
   void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+  sf::FloatRect getBoundingBox();
 
 private:
   void initTexture();
   void move(float dt);
+  void gravity(float dt);
+
+public:
+  void setLayer(collisionLayer collisionlayer);
+  collisionLayer getLayer();
+  void setMask(const std::vector<collisionLayer>& m);
+  std::vector<collisionLayer> getMask();
 
 private:
+  collisionLayer entityCollisonLayer;
+  std::vector<collisionLayer> entityCollisionMask;
   entityData ed;
   entityTexture et;
 };

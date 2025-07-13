@@ -1,5 +1,5 @@
 #include "game.hpp"
-#include "SFML/System/Clock.hpp"
+#include <iostream>
 
 Game::Game(){
   initGame();
@@ -21,11 +21,15 @@ void Game::initStuff(){
   entity.initEntity();
   tilemap.initTilemap();
   tilemap.updateTilemap();
+  sat.initSat();
 }
 
 void Game::updateGame(){
   win.dt = clock.restart().asSeconds();
   entity.updateEntity(win.dt);
+  if(sat.collided()){
+    std::cout << "kissed";
+  }
   while(const std::optional<sf::Event>event = window->pollEvent()){
     if(event->is<sf::Event::Closed>()){
       window->close();

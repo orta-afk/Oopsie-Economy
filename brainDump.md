@@ -248,3 +248,6 @@ did nothing frfr time to lock in now
 - [ ] get the basic game loop done
 
 > ohh fucking hell i am still stuck with this basic shits i don't think i can i don't think so
+
+# Alr i failed to finish in time but i will finish it.. never give up they say
+
