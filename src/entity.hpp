@@ -3,7 +3,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
-#include "SFML/System/Vector2.hpp"
 #include "collisionLayer.hpp"
 
 
@@ -35,7 +34,7 @@ class Entity : public sf::Drawable, public sf::Transformable{
 public:
   Entity();
   void initEntity();
-  void updateEntity(float dt);
+  void updateEntity(float dt, const sf::Vector2f& mtv);
   void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
   sf::FloatRect getBoundingBox();
 

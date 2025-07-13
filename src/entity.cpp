@@ -1,7 +1,4 @@
 #include "entity.hpp"
-#include "SFML/Graphics/Rect.hpp"
-#include "collisionLayer.hpp"
-#include <vector>
 
 Entity::Entity(){
   initEntity();
@@ -94,10 +91,12 @@ void Entity::gravity(float dt){
   }
 }
 
-void Entity::updateEntity(float dt){
+void Entity::updateEntity(float dt, const sf::Vector2f& mtv) {
   move(dt);
   gravity(dt);
   ed.position += ed.velocity * dt;
+  ed.position += mtv;
+  std::cout << ed.position.x << ',' << ed.position.y << std::endl;
   et.sprite.setPosition(ed.position);
   getBoundingBox();
 }

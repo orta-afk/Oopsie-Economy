@@ -1,5 +1,4 @@
 #include "game.hpp"
-#include <iostream>
 
 Game::Game(){
   initGame();
@@ -24,23 +23,28 @@ void Game::initStuff(){
   sat.initSat();
 }
 
-void Game::updateGame(){
+void Game::updateGame() {
   win.dt = clock.restart().asSeconds();
-  entity.updateEntity(win.dt);
-  if(sat.collided()){
-    std::cout << "kissed";
+  if (auto mtv = sat.collided()) {
+    win.isCollided = true;
+    entity.updateEntity(win.dt, *mtv);
+  } else {
+    win.isCollided = false;
+    entity.updateEntity(win.dt, *mtv);
   }
-  while(const std::optional<sf::Event>event = window->pollEvent()){
-    if(event->is<sf::Event::Closed>()){
+
+  while (const std::optional<sf::Event> event = window->pollEvent()) {
+    if (event->is<sf::Event::Closed>()) {
       window->close();
     }
-    if(const auto* key = event->getIf<sf::Event::KeyPressed>()){
-      if(key->scancode == sf::Keyboard::Scancode::Escape){
+    if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
+      if (key->scancode == sf::Keyboard::Scancode::Escape) {
         window->close();
       }
     }
   }
 }
+
 
 void Game::renderGame(){
   window->clear(sf::Color::Black);

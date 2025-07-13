@@ -1,7 +1,6 @@
 #include "sat.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "collisionLayer.hpp"
-#include <vector>
 
 void Sat::initSat(){
   entity.setLayer(collisionLayer::entity);
@@ -59,19 +58,36 @@ std::vector<sf::Vector2f> Sat::getNormals(const std::vector<sf::Vector2f>& point
   return normals;
 }
 
+sf::Vector2f Sat::getCenter(const std::vector<sf::Vector2f>& points){
+  sf::Vector2f sum = {0,0};
+  for(auto& p: points){
+    sum += p;
+  }
+  return sum / static_cast<float>(points.size());
+}
 
-bool Sat::collided() {
-  std::vector<sf::Vector2f> axes = entityNormals;
-  axes.insert(axes.end(), tilemapNormals.begin(), tilemapNormals.end());
-
-  for (auto& axis : axes) {
-    auto [minA, maxA] = Project(entityPoints, axis);
-    auto [minB, maxB] = Project(tilemapPoints, axis);
-
-    if (maxA < minB || maxB < minA) {
-      return false; 
+std::optional<sf::Vector2f> Sat::collided(){
+  float smallestOverlap = std::numeric_limits<float>::infinity();
+  sf::Vector2f smallestAxis;
+  std::vector<sf::Vector2f>axis = entityNormals;
+  axis.insert(axis.end(), tilemapNormals.begin(), tilemapNormals.end());
+  for(auto&p : axis){
+    auto[minA, maxA] = Project(entityPoints, p);
+    auto[minB, maxB] = Project(tilemapPoints, p);
+    if (maxA < minB || maxB < minA){
+      return std::nullopt;
+    }
+    float overlap = std::max(maxA, maxB) - std::min(minA, minB);
+    if(overlap < smallestOverlap){
+      smallestOverlap = overlap;
+      smallestAxis = p;
+    }
+    sf::Vector2f EntityCenter = getCenter(entityPoints);
+    sf::Vector2f TilemapCenter = getCenter(tilemapPoints);
+    sf::Vector2f direction = EntityCenter - TilemapCenter;
+    if(direction.dot(smallestAxis) < 0){
+      smallestAxis = -smallestAxis;
     }
   }
-
-  return true;
+  return smallestAxis * smallestOverlap;
 }

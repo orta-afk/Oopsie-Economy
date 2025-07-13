@@ -14,6 +14,7 @@ struct windowData{
   unsigned int height;
   const char* title;  
   float dt;
+  bool isCollided;
 };
 
 class Game{
